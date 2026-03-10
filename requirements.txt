@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pytesseract
+pdf2image
+python-multipart
+pillow
+anthropic
+pypdf
