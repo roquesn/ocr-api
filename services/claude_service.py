@@ -43,7 +43,7 @@ Regras importantes:
 def parse_contract(text: str):
 
     message = client.messages.create(
-        model="claude-3-5-sonnet-latest",
+        model="claude-3-haiku-20240307",
         max_tokens=2000,
         temperature=0,
         messages=[
