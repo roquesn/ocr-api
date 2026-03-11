@@ -1,28 +1,62 @@
-from anthropic import Anthropic
-from config import CLAUDE_API_KEY
+import os
+import json
+import anthropic
 
-client = Anthropic(api_key=CLAUDE_API_KEY)
+client = anthropic.Anthropic(
+    api_key=os.getenv("ANTHROPIC_API_KEY")
+)
 
+PROMPT = """
+Extraia as seguintes informações do contrato de proteção automotiva.
 
-def improve_extraction(text):
+Retorne apenas JSON no formato:
 
-    prompt = f"""
-Extract structured data from this automotive protection contract.
+{
+ "numero_contrato": "",
+ "numero_proposta": "",
+ "cliente": {
+   "nome": "",
+   "cpf_cnpj": "",
+   "telefone": "",
+   "email": ""
+ },
+ "veiculos": [
+   {
+     "placa": "",
+     "marca": "",
+     "modelo": "",
+     "ano_fabricacao": "",
+     "ano_modelo": "",
+     "renavam": "",
+     "chassi": ""
+   }
+ ]
+}
 
-{text}
-
-Return JSON with:
-
-numero_contrato
-numero_proposta
-cliente
-veiculos
+Regras importantes:
+- Pode existir mais de um veículo
+- Não invente dados
+- Se não encontrar algo, deixe vazio
+- Retorne apenas JSON
 """
 
-    response = client.messages.create(
-        model="claude-3-7-sonnet",
+def parse_contract(text: str):
+
+    message = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
         max_tokens=2000,
-        messages=[{"role":"user","content":prompt}]
+        temperature=0,
+        messages=[
+            {
+                "role": "user",
+                "content": PROMPT + "\n\nTexto do contrato:\n" + text
+            }
+        ]
     )
 
-    return response.content
+    response_text = message.content[0].text
+
+    try:
+        return json.loads(response_text)
+    except:
+        return {"error": response_text}
